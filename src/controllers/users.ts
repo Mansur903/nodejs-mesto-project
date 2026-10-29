@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { RequestWithUser } from '../app';
 import User from '../models/user';
+import type { RequestWithUser } from '../types';
 
 export const createUser = (req: Request, res: Response) => {
   const { name, about, avatar } = req.body;

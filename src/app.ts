@@ -1,10 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import router from './routes/users';
-
-export type RequestWithUser = Request & {
-  user: { _id: string };
-};
+import type { RequestWithUser } from './types';
 
 const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://localhost:27017/mestodb');
