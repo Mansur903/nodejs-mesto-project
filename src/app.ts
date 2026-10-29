@@ -1,6 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
-import router from './routes/users';
+import cardsRouter from './routes/cards';
+import usersRouter from './routes/users';
 import type { RequestWithUser } from './types';
 
 const { PORT = 3000 } = process.env;
@@ -17,7 +18,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-app.use('/', router);
+app.use('/', usersRouter);
+app.use('/', cardsRouter);
+app.use((
+  err: Error & { statusCode?: number },
+  _req: Request,
+  res: Response,
+) => {
+  const { statusCode = 500, message } = err;
+
+  return res.status(statusCode).send({
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+  });
+});
 
 app.listen(PORT, async () => {
   console.log(`App listening on port ${PORT}`);

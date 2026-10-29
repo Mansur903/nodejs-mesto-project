@@ -1,30 +1,57 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import NotFoundError from '../errors/not-found-error';
 import User from '../models/user';
 import type { RequestWithUser } from '../types';
 
-export const createUser = (req: Request, res: Response) => {
+export const createUser = (req: Request, res: Response, next: NextFunction) => {
   const { name, about, avatar } = req.body;
-
-  console.log((req as RequestWithUser).user._id);
 
   return User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
 };
 
-export const getUsers = (req: Request, res: Response) => User.find({})
+export const getUsers = (req: Request, res: Response, next: NextFunction) => User.find({})
   .then((users) => res.send({ data: users }))
-  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch(next);
 
-export const getUserById = (req: Request, res: Response) => {
-  const { userId } = req.params;
+export const getUserById = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => User.findById(req.params.userId)
+  .then((user) => {
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    return res.send({ data: user });
+  })
+  .catch(next);
 
-  return User.findById(userId)
+export const updateProfile = (req: Request, res: Response, next: NextFunction) => {
+  const { name, about } = req.body;
+  const userId = (req as RequestWithUser).user._id;
+
+  return User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send({ data: user });
     })
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(next);
+};
+
+export const updateAvatar = (req: Request, res: Response, next: NextFunction) => {
+  const { avatar } = req.body;
+  const userId = (req as RequestWithUser).user._id;
+
+  return User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
+      return res.send({ data: user });
+    })
+    .catch(next);
 };
