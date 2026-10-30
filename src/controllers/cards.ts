@@ -20,9 +20,7 @@ export const deleteCard = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => Card.findOneAndDelete({
-  _id: req.params.cardId,
-})
+) => Card.findOneAndDelete({ _id: req.params.cardId })
   .then((card) => {
     if (!card) {
       throw new NotFoundError('Карточка не найдена');

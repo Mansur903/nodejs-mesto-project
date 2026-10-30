@@ -1,3 +1,4 @@
+import { errors } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 import cardsRouter from './routes/cards';
@@ -20,15 +21,20 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
+app.use(errors());
 app.use((
   err: Error & { statusCode?: number },
   _req: Request,
   res: Response,
+  // eslint-disable-next-line no-unused-vars
+  _next: NextFunction,
 ) => {
-  const { statusCode = 500, message } = err;
+  const statusCode = err.statusCode
+    ?? (err instanceof mongoose.Error.ValidationError
+      || err instanceof mongoose.Error.CastError ? 400 : 500);
 
   return res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : err.message,
   });
 });
 

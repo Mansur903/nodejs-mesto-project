@@ -1,3 +1,4 @@
+import { celebrate, Joi } from 'celebrate';
 import {
   NextFunction, Request, Response, Router,
 } from 'express';
@@ -9,7 +10,12 @@ const router = Router();
 
 router.get('/cards', (req: Request, res: Response, next: NextFunction) => getCards(req, res, next));
 
-router.post('/cards', (req: Request, res: Response, next: NextFunction) => createCard(req, res, next));
+router.post('/cards', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().required(),
+  }),
+}), (req: Request, res: Response, next: NextFunction) => createCard(req, res, next));
 
 router.delete('/cards/:cardId', (req: Request, res: Response, next: NextFunction) => deleteCard(req, res, next));
 
