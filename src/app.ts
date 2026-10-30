@@ -1,6 +1,8 @@
 import { errors } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import NotFoundError from './errors/not-found-error';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from './errors/status-codes';
 import cardsRouter from './routes/cards';
 import usersRouter from './routes/users';
 import type { RequestWithUser } from './types';
@@ -21,6 +23,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
+app.use((_req: Request, _res: Response, next: NextFunction) => {
+  next(new NotFoundError('Маршрут не найден'));
+});
 app.use(errors());
 app.use((
   err: Error & { statusCode?: number },
@@ -31,13 +36,11 @@ app.use((
 ) => {
   const statusCode = err.statusCode
     ?? (err instanceof mongoose.Error.ValidationError
-      || err instanceof mongoose.Error.CastError ? 400 : 500);
+      || err instanceof mongoose.Error.CastError ? BAD_REQUEST : INTERNAL_SERVER_ERROR);
 
   return res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла ошибка' : err.message,
+    message: statusCode === INTERNAL_SERVER_ERROR ? 'На сервере произошла ошибка' : err.message,
   });
 });
 
-app.listen(PORT, async () => {
-  console.log(`App listening on port ${PORT}`);
-});
+app.listen(PORT);
