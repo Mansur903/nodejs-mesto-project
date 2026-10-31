@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import NotFoundError from '../errors/not-found-error';
+import { CREATED } from '../errors/status-codes';
 import Card from '../models/card';
-import type { RequestWithUser } from '../types';
 
 export const getCards = (req: Request, res: Response, next: NextFunction) => Card.find({})
   .then((cards) => res.send({ data: cards }))
@@ -9,10 +9,10 @@ export const getCards = (req: Request, res: Response, next: NextFunction) => Car
 
 export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
-  const owner = (req as RequestWithUser).user._id;
+  const owner = req.user._id;
 
   return Card.create({ name, link, owner })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.status(CREATED).send({ data: card }))
     .catch(next);
 };
 
@@ -20,7 +20,7 @@ export const deleteCard = (
   req: Request,
   res: Response,
   next: NextFunction,
-) => Card.findOneAndDelete({ _id: req.params.cardId })
+) => Card.findByIdAndDelete(req.params.cardId)
   .then((card) => {
     if (!card) {
       throw new NotFoundError('Карточка не найдена');
@@ -30,7 +30,7 @@ export const deleteCard = (
   .catch(next);
 
 export const likeCard = (req: Request, res: Response, next: NextFunction) => {
-  const userId = (req as RequestWithUser).user._id;
+  const userId = req.user._id;
 
   return Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((card) => {
@@ -43,7 +43,7 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const dislikeCard = (req: Request, res: Response, next: NextFunction) => {
-  const userId = (req as RequestWithUser).user._id;
+  const userId = req.user._id;
 
   return Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {

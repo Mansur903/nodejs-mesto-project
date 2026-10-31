@@ -22,6 +22,17 @@ const userSchema = new mongoose.Schema<IUser>({
   avatar: {
     type: String,
     required: true,
+    validate: {
+      validator: (value: string) => {
+        try {
+          const url = new URL(value);
+          return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      },
+      message: 'Ссылка на аватар должна быть корректным HTTP или HTTPS URL',
+    },
   },
 });
 

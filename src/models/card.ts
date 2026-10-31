@@ -18,6 +18,17 @@ const cardSchema = new mongoose.Schema<ICard>({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (value: string) => {
+        try {
+          const url = new URL(value);
+          return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+          return false;
+        }
+      },
+      message: 'Ссылка на карточку должна быть корректным HTTP или HTTPS URL',
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
