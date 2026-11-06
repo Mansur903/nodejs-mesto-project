@@ -1,12 +1,20 @@
+import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+
 import NotFoundError from '../errors/not-found-error';
-import { CREATED } from '../errors/status-codes';
+import { CREATED, UNAUTHORIZED } from '../errors/status-codes';
 import User from '../models/user';
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  return User.create({ name, about, avatar })
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    }))
     .then((user) => res.status(CREATED).send({ data: user }))
     .catch(next);
 };
@@ -54,4 +62,22 @@ export const updateAvatar = (req: Request, res: Response, next: NextFunction) =>
       return res.send({ data: user });
     })
     .catch(next);
+};
+
+export const login = (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+
+      return res
+        .cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }) // 7 days
+        .send({ message: 'Вход выполнен' });
+    })
+    .catch((err) => {
+      res
+        .status(UNAUTHORIZED)
+        .send({ message: err.message });
+    });
 };

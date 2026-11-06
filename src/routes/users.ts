@@ -3,18 +3,10 @@ import {
   NextFunction, Request, Response, Router,
 } from 'express';
 import {
-  createUser, getUserById, getUsers, updateAvatar, updateProfile,
+  getUserById, getUsers, updateAvatar, updateProfile,
 } from '../controllers/users';
 
 const router = Router();
-
-router.post('/users', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required(),
-    about: Joi.string().min(2).max(200).required(),
-    avatar: Joi.string().required(),
-  }),
-}), (req: Request, res: Response, next: NextFunction) => createUser(req, res, next));
 
 router.get('/users', (req: Request, res: Response, next: NextFunction) => getUsers(req, res, next));
 

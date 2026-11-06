@@ -1,6 +1,7 @@
 import { isCelebrateError } from 'celebrate';
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import { createUser, login } from './controllers/users';
 import NotFoundError from './errors/not-found-error';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from './errors/status-codes';
 import router from './routes';
@@ -11,6 +12,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 const app = express();
 
 app.use(express.json());
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   req.user = { _id: '6ae393f352e9d78113bf5f36' };
