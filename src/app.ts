@@ -1,4 +1,4 @@
-import { isCelebrateError } from 'celebrate';
+import { celebrate, isCelebrateError, Joi } from 'celebrate';
 import cookieParser from 'cookie-parser';
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
@@ -21,8 +21,21 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }).required(),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(200),
+    avatar: Joi.string().uri({ scheme: ['http', 'https'] }),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }).required(),
+}), createUser);
 
 app.use(auth);
 

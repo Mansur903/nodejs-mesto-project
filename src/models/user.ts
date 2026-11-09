@@ -18,6 +18,8 @@ interface UserModel extends mongoose.Model<IUser> {
     Promise<mongoose.Document<unknown, any, IUser>>
 }
 
+const avatarUrlRegex = /^https?:\/\/(?:www\.)?(?!www\.)(?:[a-z\d-]+\.)+[a-z]{2,}(?:[/?#][-\w.~:/?#[\]@!$&'()*+,;=]*)?$/i;
+
 const userSchema = new mongoose.Schema<IUser, UserModel>({
   name: {
     type: String,
@@ -33,17 +35,7 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
   },
   avatar: {
     type: String,
-    validate: {
-      validator: (value: string) => {
-        try {
-          const url = new URL(value);
-          return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch {
-          return false;
-        }
-      },
-      message: 'Ссылка на аватар должна быть корректным HTTP или HTTPS URL',
-    },
+    match: [avatarUrlRegex, 'Ссылка на аватар должна быть корректным HTTP или HTTPS URL'],
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
   email: {

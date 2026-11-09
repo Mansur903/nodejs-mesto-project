@@ -13,7 +13,7 @@ router.get('/cards', (req: Request, res: Response, next: NextFunction) => getCar
 router.post('/cards', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().required(),
+    link: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
   }),
 }), (req: Request, res: Response, next: NextFunction) => createCard(req, res, next));
 
