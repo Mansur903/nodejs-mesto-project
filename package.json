@@ -9,13 +9,14 @@
   "scripts": {
     "lint": "npx eslint src/**/*.ts",
     "build": "tsc",
-    "dev": "ts-node-dev src/app.ts",
-    "start": "ts-node src/app.ts",
+    "dev": "ts-node-dev --files src/app.ts",
+    "start": "ts-node --files src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Mansur Khusnutdinov",
   "license": "ISC",
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.13.3",
@@ -31,8 +32,11 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "celebrate": "^16.0.0",
+    "cookie-parser": "^1.4.7",
     "express": "^5.2.1",
+    "express-winston": "^4.2.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.9.2"
+    "mongoose": "^9.9.2",
+    "winston": "^3.19.0"
   }
 }

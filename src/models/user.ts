@@ -2,6 +2,9 @@ import bcrypt from 'bcryptjs';
 import { Joi } from 'celebrate';
 import mongoose from 'mongoose';
 
+import StatusCodeError from '../errors/status-code-error';
+import { UNAUTHORIZED } from '../errors/status-codes';
+
 export interface IUser {
   name: string;
   about: string;
@@ -55,21 +58,21 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
   password: {
     type: String,
     required: true,
-    // select: false, // Exclude password from query results by default
+    select: false,
   },
 });
 
 userSchema.static('findUserByCredentials', function findUserByCredentials(email: string, password: string) {
-  return this.findOne({ email })
+  return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return Promise.reject(new StatusCodeError(UNAUTHORIZED, 'Неправильные почта или пароль'));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+            return Promise.reject(new StatusCodeError(UNAUTHORIZED, 'Неправильные почта или пароль'));
           }
 
           return user;

@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import NotFoundError from '../errors/not-found-error';
-import { CREATED, UNAUTHORIZED } from '../errors/status-codes';
+import StatusCodeError from '../errors/status-code-error';
+import { CREATED, NOT_FOUND } from '../errors/status-codes';
 import User from '../models/user';
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
@@ -30,11 +30,24 @@ export const getUserById = (
 ) => User.findById(req.params.userId)
   .then((user) => {
     if (!user) {
-      throw new NotFoundError('Пользователь не найден');
+      throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
     }
     return res.send({ data: user });
   })
   .catch(next);
+
+export const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.user._id;
+
+  return User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
+      }
+      return res.send({ data: user });
+    })
+    .catch(next);
+};
 
 export const updateProfile = (req: Request, res: Response, next: NextFunction) => {
   const { name, about } = req.body;
@@ -43,7 +56,7 @@ export const updateProfile = (req: Request, res: Response, next: NextFunction) =
   return User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
       }
       return res.send({ data: user });
     })
@@ -57,14 +70,14 @@ export const updateAvatar = (req: Request, res: Response, next: NextFunction) =>
   return User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
       }
       return res.send({ data: user });
     })
     .catch(next);
 };
 
-export const login = (req: Request, res: Response) => {
+export const login = (req: Request, res: Response, next: NextFunction) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -72,12 +85,8 @@ export const login = (req: Request, res: Response) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
 
       return res
-        .cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 }) // 7 days
+        .cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 })
         .send({ message: 'Вход выполнен' });
     })
-    .catch((err) => {
-      res
-        .status(UNAUTHORIZED)
-        .send({ message: err.message });
-    });
+    .catch(next);
 };
