@@ -14,7 +14,7 @@ router.post('/cards', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
     link: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
-  }),
+  }).required(),
 }), (req: Request, res: Response, next: NextFunction) => createCard(req, res, next));
 
 router.delete('/cards/:cardId', (req: Request, res: Response, next: NextFunction) => deleteCard(req, res, next));

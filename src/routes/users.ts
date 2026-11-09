@@ -19,13 +19,13 @@ router.patch('/users/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(200),
-  }).min(1),
+  }).min(1).required(),
 }), (req: Request, res: Response, next: NextFunction) => updateProfile(req, res, next));
 
 router.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().uri({ scheme: ['http', 'https'] }).required(),
-  }),
+  }).required(),
 }), (req: Request, res: Response, next: NextFunction) => updateAvatar(req, res, next));
 
 export default router;

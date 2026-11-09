@@ -15,7 +15,15 @@ export const createUser = (req: Request, res: Response, next: NextFunction) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.status(CREATED).send({ data: user }))
+    .then((user) => res.status(CREATED).send({
+      data: {
+        _id: user._id,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      },
+    }))
     .catch(next);
 };
 
