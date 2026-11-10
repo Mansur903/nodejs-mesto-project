@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
+import { JWT_SECRET } from '../config';
 import NotFoundError from '../errors/not-found-error';
 import { CREATED } from '../errors/status-codes';
 import User from '../models/user';
@@ -90,7 +91,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
 
       return res
         .cookie('token', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 })

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
+import { JWT_SECRET } from '../config';
 import UnauthorizedError from '../errors/unauthorized-error';
 
 export default (req: Request, _res: Response, next: NextFunction) => {
@@ -12,7 +13,7 @@ export default (req: Request, _res: Response, next: NextFunction) => {
 
   let payload: jwt.JwtPayload | string;
   try {
-    payload = jwt.verify(token, 'some-secret-key');
+    payload = jwt.verify(token, JWT_SECRET);
   } catch {
     return next(new UnauthorizedError('Неверный токен'));
   }

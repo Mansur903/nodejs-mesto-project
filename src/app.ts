@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
+import { PORT } from './config';
 import { createUser, login } from './controllers/users';
 import NotFoundError from './errors/not-found-error';
 import auth from './middlewares/auth';
@@ -10,7 +11,6 @@ import errorHandler from './middlewares/error-handler';
 import { errorLogger, requestLogger } from './middlewares/logger';
 import router from './routes';
 
-const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 const app = express();
