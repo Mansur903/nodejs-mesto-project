@@ -9,11 +9,17 @@ import {
 
 const router = Router();
 
+const validateUserId = celebrate({
+  params: Joi.object().keys({
+    userId: Joi.string().hex().length(24).required(),
+  }).required(),
+});
+
 router.get('/users', (req: Request, res: Response, next: NextFunction) => getUsers(req, res, next));
 
 router.get('/users/me', (req: Request, res: Response, next: NextFunction) => getCurrentUser(req, res, next));
 
-router.get('/users/:userId', (req: Request, res: Response, next: NextFunction) => getUserById(req, res, next));
+router.get('/users/:userId', validateUserId, (req: Request, res: Response, next: NextFunction) => getUserById(req, res, next));
 
 router.patch('/users/me', celebrate({
   body: Joi.object().keys({

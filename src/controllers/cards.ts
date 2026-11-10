@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import StatusCodeError from '../errors/status-code-error';
-import { CREATED, FORBIDDEN, NOT_FOUND } from '../errors/status-codes';
+import ForbiddenError from '../errors/forbidden-error';
+import NotFoundError from '../errors/not-found-error';
+import { CREATED } from '../errors/status-codes';
 import Card from '../models/card';
 
 export const getCards = (req: Request, res: Response, next: NextFunction) => Card.find({})
@@ -23,10 +24,10 @@ export const deleteCard = (
 ) => Card.findById(req.params.cardId)
   .then((card) => {
     if (!card) {
-      throw new StatusCodeError(NOT_FOUND, 'Карточка не найдена');
+      throw new NotFoundError('Карточка не найдена');
     }
     if (card.owner.toString() !== req.user._id) {
-      throw new StatusCodeError(FORBIDDEN, 'Вы не можете удалить чужую карточку');
+      throw new ForbiddenError('Вы не можете удалить чужую карточку');
     }
     return card.deleteOne().then(() => res.send({ data: card }));
   })
@@ -38,7 +39,7 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
   return Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        throw new StatusCodeError(NOT_FOUND, 'Карточка не найдена');
+        throw new NotFoundError('Карточка не найдена');
       }
       return res.send({ data: card });
     })
@@ -51,7 +52,7 @@ export const dislikeCard = (req: Request, res: Response, next: NextFunction) => 
   return Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: userId } }, { new: true })
     .then((card) => {
       if (!card) {
-        throw new StatusCodeError(NOT_FOUND, 'Карточка не найдена');
+        throw new NotFoundError('Карточка не найдена');
       }
       return res.send({ data: card });
     })

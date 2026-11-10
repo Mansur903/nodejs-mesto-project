@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import StatusCodeError from '../errors/status-code-error';
-import { CREATED, NOT_FOUND } from '../errors/status-codes';
+import NotFoundError from '../errors/not-found-error';
+import { CREATED } from '../errors/status-codes';
 import User from '../models/user';
 
 export const createUser = (req: Request, res: Response, next: NextFunction) => {
@@ -38,7 +38,7 @@ export const getUserById = (
 ) => User.findById(req.params.userId)
   .then((user) => {
     if (!user) {
-      throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
+      throw new NotFoundError('Пользователь не найден');
     }
     return res.send({ data: user });
   })
@@ -50,7 +50,7 @@ export const getCurrentUser = (req: Request, res: Response, next: NextFunction) 
   return User.findById(userId)
     .then((user) => {
       if (!user) {
-        throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send({ data: user });
     })
@@ -64,7 +64,7 @@ export const updateProfile = (req: Request, res: Response, next: NextFunction) =
   return User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send({ data: user });
     })
@@ -78,7 +78,7 @@ export const updateAvatar = (req: Request, res: Response, next: NextFunction) =>
   return User.findByIdAndUpdate(userId, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new StatusCodeError(NOT_FOUND, 'Пользователь не найден');
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send({ data: user });
     })
