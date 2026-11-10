@@ -2,11 +2,12 @@ import { NextFunction, Request, Response } from 'express';
 import ForbiddenError from '../errors/forbidden-error';
 import NotFoundError from '../errors/not-found-error';
 import { CREATED } from '../errors/status-codes';
+import normalizeDatabaseError from '../helpers/normalize-database-error';
 import Card from '../models/card';
 
 export const getCards = (req: Request, res: Response, next: NextFunction) => Card.find({})
   .then((cards) => res.send({ data: cards }))
-  .catch(next);
+  .catch((err: unknown) => next(normalizeDatabaseError(err)));
 
 export const createCard = (req: Request, res: Response, next: NextFunction) => {
   const { name, link } = req.body;
@@ -14,7 +15,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
 
   return Card.create({ name, link, owner })
     .then((card) => res.status(CREATED).send({ data: card }))
-    .catch(next);
+    .catch((err: unknown) => next(normalizeDatabaseError(err)));
 };
 
 export const deleteCard = (
@@ -31,7 +32,7 @@ export const deleteCard = (
     }
     return card.deleteOne().then(() => res.send({ data: card }));
   })
-  .catch(next);
+  .catch((err: unknown) => next(normalizeDatabaseError(err)));
 
 export const likeCard = (req: Request, res: Response, next: NextFunction) => {
   const userId = req.user._id;
@@ -43,7 +44,7 @@ export const likeCard = (req: Request, res: Response, next: NextFunction) => {
       }
       return res.send({ data: card });
     })
-    .catch(next);
+    .catch((err: unknown) => next(normalizeDatabaseError(err)));
 };
 
 export const dislikeCard = (req: Request, res: Response, next: NextFunction) => {
@@ -56,5 +57,5 @@ export const dislikeCard = (req: Request, res: Response, next: NextFunction) => 
       }
       return res.send({ data: card });
     })
-    .catch(next);
+    .catch((err: unknown) => next(normalizeDatabaseError(err)));
 };
